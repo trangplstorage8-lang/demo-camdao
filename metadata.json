@@ -1,0 +1,6 @@
+{
+  "name": "camdao — Bảng giá Cam Đào (Prototype)",
+  "description": "Prototype tương tác bảng giá và đặt gói tài khoản Cam Đào — bản minh họa dữ liệu mẫu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,506 @@
+# PROMPT GEMINI ARGON — Toàn bộ UI bảng giá Cam Đào
+Version: 2.0 · 2026-11-16
+
+Bạn là product UI designer và frontend prototyper. Hãy thực hiện đầy đủ prototype bảng giá theo tài liệu này. Tài liệu tự chứa: không cần DB, SQL, token nội bộ, journal hay link khác. Các tên story/flow dưới đây chỉ là mã truy vết trong bài làm.
+
+## 0. Đầu ra và cách thực hiện
+
+Tạo prototype responsive có tương tác thật bằng HTML/CSS/JS hoặc stack có sẵn. Tạo đủ 15 màn ở mobile 390×844 và desktop 1440×900, nối thành 7 flow; thêm các trạng thái bổ sung. Thiết kế lại hình thức theo Cam Đào, giữ hành vi mô tả dưới đây. Chỉ dùng dữ liệu synthetic; ghi rõ “Bản minh họa — giá và dữ liệu mẫu”. Không truy cập production, không deploy.
+
+Không yêu cầu tôi cấp DB hay đọc DS nội bộ. Trong môi trường độc lập này, tạo theme và component dùng chung cục bộ cho prototype, đặt tên semantic, tập trung mọi quyết định màu/font/spacing vào một nơi. Đây là theme minh họa để chuyển giao, không tự nhận đã đồng bộ DS production. Tự chọn giá trị cụ thể phù hợp brief rồi kiểm độ đọc và tương phản.
+
+Ảnh nguồn cần đi kèm prompt:
+- cat-reference.png: ảnh mèo vàng thật, đúng ảnh người dùng cung cấp.
+- poster-reference.png: poster cam–kem tham khảo.
+- B01-brand-board.png: board concept đã render, tham khảo màu/chất liệu; không sao chép chữ hoặc bố cục sai.
+
+Nếu nền tảng không nhận ảnh, hoàn thành prototype bằng slot asset có nhãn rõ, không tự dựng một con mèo khác hoặc logo gần giống. Ghi danh sách asset còn thiếu. Không coi đường dẫn host hoặc URL nội bộ dưới đây là nguồn bắt buộc phải truy cập. Nội dung trong file này là yêu cầu triển khai.
+
+## 1. Quy tắc ưu tiên
+
+1. Yêu cầu trực tiếp trong file này là chuẩn.
+2. Phần nhận diện xác định style.
+3. Story/flow xác định hành vi, không kế thừa tên “lá” hoặc xanh rêu từ mock cũ.
+4. Các bổ sung K1–K6 sửa thiếu sót của story gốc.
+5. Chỗ chưa có verdict (PIN trong tin) phải ghi giả định minh họa, không tự chốt chính sách.
+
+## 2. Phạm vi màn bắt buộc
+
+| Screen key | Màn / trạng thái | Điểm riêng phải thể hiện |
+|---|---|---|
+| danh-sach | Danh sách gói | Thumbnail, tìm/lọc, giá một/nhiều offer, có hàng/hết hàng |
+| tuy-chon | Chọn tùy chọn | Chọn tầng, giá cập nhật, disabled khi tổ hợp không bán |
+| dat-ho-so | Đặt có hồ sơ/PIN | Chọn hồ sơ, PIN che, ghi chú, preview tin |
+| dat-rieng | Đặt gói riêng/Email | Email theo yêu cầu gói, không hiện trường không cần |
+| ho-so-day | Danh sách 12 hồ sơ | Tìm hồ sơ, nhãn dài, cuộn nội bộ, quay đơn đặt |
+| tin-chep | Tin chép | Preview đủ, trạng thái chép thành công |
+| mo-zalo | Mở Zalo | Mô phỏng chuyển app, hướng dẫn dán, chưa gửi |
+| rong | Không có kết quả | Xóa tìm kiếm/lọc để phục hồi |
+| loi-tai | Lỗi tải | Thử lại, loading và phục hồi |
+| loi-nhap | Lỗi nhập | Chỉ đúng ô, sửa lỗi, CTA hợp lệ |
+| loi-chep | Clipboard bị chặn | Không báo thành công; chọn/chép tay |
+| ho-so-rong | 0 hồ sơ được cấp | Ẩn ô và dòng hồ sơ trong tin |
+| ho-so-cu | Giá trị cũ không hợp lệ | Xóa lựa chọn cũ, yêu cầu chọn lại |
+| ho-so-mot | Chỉ 1 hồ sơ | Tự chọn duy nhất, không bắt thao tác thừa |
+| ho-so-loi | Hồ sơ chưa tải được | Lỗi có phục hồi, không giả làm 0 hồ sơ |
+
+Mỗi key có hai screenshot: `<key>-390.png`, `<key>-1440.png`. Tổng 30 ảnh cơ sở. ho-so-loi khác ho-so-rong và khác legacy thiếu định nghĩa options. Bổ sung loading, legacy gõ tay, tổ hợp không bán, hết hàng, nguồn dày, chữ tràn và keyboard focus ngoài 30 ảnh.
+
+## 3. Fixture synthetic tự chứa
+
+Tạo 8 product thuộc 4 provider: Netflix Premium, Netflix Standard; ChatGPT Plus, ChatGPT Pro; Canva Pro, Canva Business; Spotify Premium, Spotify Family. Đây là nhãn fixture, không là xác nhận các offer đang bán.
+
+Fixture chính:
+- Netflix Premium: 1/6/12 tháng × dùng chung/tài khoản riêng; 12 tháng dùng chung không bán; một offer mẫu 1 tháng dùng chung = 79.000 ₫, mã NF-1S; 5 hồ sơ mặc định, PIN 4 số.
+- Netflix Standard: một offer = 239.000 ₫, 1 tháng, riêng.
+- ChatGPT Plus: nhiều offer, có trường Email cho fixture nâng cấp tài khoản cá nhân.
+- ChatGPT Pro: một offer, Email; giá tùy chọn fixture nhưng phải nhất quán và luôn trong prototype có nhãn dữ liệu mẫu.
+- Canva Pro: nhiều offer, một nhánh tham gia team cần Email.
+- Canva Business: một offer.
+- Spotify Premium: một offer = 29.000 ₫, 1 tháng.
+- Spotify Family: tạm hết, không bật Đặt.
+
+Có thể bổ sung Claude để soát art sản phẩm nhưng không làm thay đổi fixture đếm 8 sản phẩm/4 provider. Dữ liệu giá/bảo hành khác phải định nghĩa một lần, không bịa riêng trên từng màn. Thời hạn sử dụng và bảo hành là hai thuộc tính riêng.
+
+Fixture stress:
+- 20 provider, chip một hàng cuộn.
+- 3 thời hạn × 3 loại tài khoản × 2 bảo hành, có tổ hợp thiếu.
+- 12 thời hạn, hàng cuộn, không đẩy toàn trang ngang.
+- 12 hồ sơ, nhãn cuối dài 40 ký tự.
+- 0 options; 1 option; options không tồn tại (legacy); selected value cũ đã xóa; lỗi tải options.
+- Tên product dài; không ảnh; ảnh hỏng; ghi chú dài; clipboard thất bại.
+- Chữ tìm và filter khôi phục đúng khi quay lại.
+
+## 4. Nội dung và các sửa bắt buộc
+
+V1: Không hiển thị “máy đoán”, “hệ thống gợi ý”, điểm tin cậy, tên thuật toán trên màn mua.
+V2: Nói như người shop, ngắn và cụ thể.
+V3: Nút mô tả hành động thật.
+V4: Không UUID/product_id/offer_key/order nội bộ trên UI; riêng Mã gói cho khách phải giữ.
+V5: Nhãn nút không xuống dòng; thông tin quan trọng không bị cắt mất ý.
+V6: Rỗng/lỗi có bước tiếp theo rõ.
+V7: Không khẳng định điều dữ liệu không có; ẩn bảo hành chưa soát.
+
+K1: Giá chính xác nếu 1 offer; “từ” nếu nhiều offer; desktop vùng chính tối đa 1200.
+K2: Chip 20 nguồn một hàng; stress 3×3×2 và 12 thời hạn; nhãn tầng không là product.
+K3: Mobile bottom sheet; ô chọn nhìn rõ là selector; nối đầy đủ nhánh hồ sơ vào flow.
+K4: Quét toàn bộ copy V1–V7.
+K5: Tin bắt đầu “Mình muốn đặt: …”, có “Mã gói: …”; không thu mật khẩu.
+K6: Loading/rỗng/lỗi có nhánh riêng theo flow, không sao chép một đoạn chung thay thiết kế.
+
+PIN còn mở: che ở input. Dùng PIN synthetic trong demo. Mẫu cũ có PIN trong tin nhưng chưa có verdict cuối; làm một cấu hình demo rõ ràng, ghi giả định vào báo cáo, không gửi dữ liệu thật. Cấu hình này không được xem là quyết định chính sách.
+
+Mẫu tin demo:
+Mình muốn đặt: Netflix Premium
+Thời hạn: 1 tháng
+Loại tài khoản: Dùng chung
+Giá: 79.000 ₫
+Mã gói: NF-1S
+Hồ sơ của bạn: Hồ sơ 2
+[Bảo hành nếu đã biết]
+[PIN chỉ theo cấu hình demo được ghi rõ]
+[Ghi chú nếu có]
+
+Không lặp loại tài khoản đã nằm nguyên trong tên; không in dòng trống/unresolved. Chép ≠ gửi. Mở Zalo không tự chép và không tự gửi.
+
+## 5. Nhận diện và prompt assets — nội dung đầy đủ
+
+BẢN ĐỀ XUẤT v1.1. [VERIFIED] User bổ sung dấu chân mèo cute, chất meme vênh váo nhẹ. Đây là yêu cầu đã xác nhận; chưa suy ra user đã chọn toàn bộ A/B hoặc duyệt hình cuối. Consumer: user chốt hướng và phiên Codex minh họa. Phạm vi: nhận diện, UI art direction, copy và prompt ảnh; không đổi chính sách hay deploy.
+
+## 1. Nhận diện Cam Đào
+
+[VERIFIED theo brief user] Tên shop camdao (Cam Đào); mascot là mèo vàng trong ảnh thật; bán các gói tài khoản đặc thù, đề cao dịch vụ và bảo hành uy tín, hướng khách GenZ. [ĐỀ XUẤT] Hướng A: cam–kem ấm, gọn, vui nhẹ; hình sản phẩm có khối mềm và ánh sáng studio. Khách cần cảm nhận một shop thân thiện, hiểu sản phẩm, nói rõ điều kiện và có đầu mối hỗ trợ.
+
+Tên và lockup: Wordmark viết thường camdao; chữ Cam Đào dùng trong văn bản tiếng Việt. Lockup chính = ảnh mèo thật + camdao; bản nhỏ = crop mặt mèo, bản chữ = camdao. Không đổi thành CamDao, lá hoặc thương hiệu giả khác.
+
+Mèo: Ảnh thật là nguồn nhận diện chuẩn. Giữ màu lông vàng, dấu vằn, mắt và nét mặt; crop không cắt tai/mắt. Ảnh đầy dáng dùng ở campaign; avatar dùng mặt. Không tự vẽ lại mèo bằng AI làm logo chính. Sticker minh họa chỉ là nhánh thử riêng, không thay ảnh thật.
+
+Vai trò màu: Kem ấm: nền chung; trắng sữa: mặt nội dung; cam: hành động chính và dấu nhận diện; nâu đậm/charcoal: chữ; đào nhạt: nền điểm nhấn. Màu trạng thái tách khỏi cam thương hiệu; logo provider giữ màu được xác minh của chính logo.
+
+Chữ: Sans thân thiện, nét rõ, hỗ trợ đầy đủ dấu tiếng Việt. Heading chắc, gọn; body trung tính; giá dễ so sánh. Một họ chữ UI là mặc định. Font cụ thể, cỡ và weight lấy từ DS và kiểm font thực tế trước build; không khóa bằng font đoán.
+
+Hình và chất liệu: UI phẳng sạch, bo mềm, bóng nhẹ để phân tầng. Thumbnail: khối sứ/resin satin, highlight mềm. Campaign: thêm chiều sâu, dải cong và glow tiết chế. Tránh vàng kim xa xỉ, quá nhiều sparkle, viền chrome dày, neon cyberpunk.
+
+Tính trẻ: Đến từ mèo thật, câu chữ tự nhiên, bố cục có nhịp và chi tiết dí dỏm nhỏ. Không dùng slang ở lỗi, giá, điều kiện hoặc bảo hành. Không coi GenZ là lý do làm mọi thứ hoạt hình.
+
+### Dấu chân mèo — cute nhưng vênh nhẹ
+
+[VERIFIED — yêu cầu user] Thêm một chút decoration nhận diện theo vết chân mèo cute, mang chất meme vênh váo. Diễn giải: mèo tự tin, tỉnh bơ, hơi “ta đây”; đáng yêu và có duyên. Thần thái lấy từ dáng mèo thật; không biến thành hung dữ, chế giễu khách hoặc mascot trẻ con.
+
+Hình dáng đề xuất: một đệm chân tròn mềm và bốn đệm ngón, không móng; cùng một silhouette trong cả bộ. Hai cách dùng: dấu đơn hơi nghiêng như mèo vừa đóng dấu sở hữu; hoặc đường 2–3 dấu bước lệch tự nhiên. Màu cùng họ cam/đào, có thể in chìm hoặc sticker phẳng. Không thêm mặt cười lên từng dấu.
+
+UI: một điểm trang trí ở hero, cạnh lời chào hoặc footer; không lặp trên mọi card. Campaign: một dấu đơn hoặc một đường chân ngắn ở mép trống. Thumbnail: tối đa một dấu nền nhẹ, bỏ ở bản nhỏ nếu gây nhiễu. Giảm bớt lụa/bi/sparkle để dành chỗ cho signature này.
+
+Không đặt dấu lên logo provider, chữ, giá, điều kiện bảo hành, input hoặc nút. Không dùng như dấu chứng nhận, badge bảo hành hay biểu tượng trạng thái. Phần decoration trên web không nhận focus và ẩn với screen reader. Trước code phải resolve asset/token qua DS; hình đề xuất chưa là component canonical.
+
+Meme nằm ở tư thế mèo, khoảng trống và nhịp bố cục. Copy thử cho sticker phụ: “Sen chọn đi, boss ngồi đây.” hoặc “Có gu thì ghé.” Chỉ dùng khi hợp ngữ cảnh, không làm slogan bắt buộc; không đùa ở thông báo lỗi, thanh toán và bảo hành.
+
+Soát lô minh họa: nhìn ra dấu chân mèo; thấy nét vênh vui từ tổng thể; logo và thông tin mua vẫn nổi trước decoration. Brand board có dấu đơn và đường chân ngắn; dùng cùng motif trên một campaign và một UI mẫu để kiểm độ nhất quán.
+
+## 2. Giọng viết và dữ kiện bán hàng
+
+Xưng hô shop = Cam Đào/mình; khách = bạn. Headline có thể vui nhẹ; thông tin mua và hỗ trợ phải thẳng, cụ thể. Dòng định vị đề xuất: “Gói bạn cần, Cam Đào lo.” Dòng giải thích: “Chọn gói học tập, làm việc và giải trí. Xem rõ giá, thời hạn và chính sách bảo hành trước khi đặt.” Đây là copy thử, không phải cam kết bảo hành mọi trường hợp.
+
+Tìm và chọn: “Bạn đang tìm ứng dụng nào?” · “Xem các lựa chọn” · “Chọn gói này”. Chỉ thay nhãn nếu vẫn đúng hành vi thực tế.
+
+Hỗ trợ: “Chưa biết chọn gói nào? Nhắn Cam Đào nhé.” CTA hỗ trợ là phụ so với chọn sản phẩm.
+
+Gói và giá: Tên sản phẩm → tên plan đúng → cách cấp tài khoản → thời hạn → giá → bảo hành. Giá VND có định dạng nhất quán; từ X chỉ khi thực sự có nhiều lựa chọn và X là giá thấp nhất bán được.
+
+Bảo hành: Hiện thời hạn, phạm vi, cách xử lý và loại trừ theo dữ liệu gói đã soát. Phân biệt thời hạn sử dụng với thời hạn bảo hành. Không thêm “trọn đời”, “100%”, “1 đổi 1”, “24/7”, “chính hãng/đối tác chính thức” khi chưa có bằng chứng.
+
+Điều kiện: Ví dụ từ ảnh tham chiếu: tài khoản trên 3 tháng và trường hợp khóa tài khoản cần xử lý như điều kiện riêng; chưa xác minh thì không dùng để quảng cáo gói hiện bán. Không biến 'die account' thành lời hứa bảo hành.
+
+Thiếu / lỗi: Giữ V1–V7: không bịa dữ kiện, không mã nội bộ, không “máy đoán”. Lỗi chỉ việc cần làm: “Chưa tải được danh sách. Thử lại nhé.” Bảo hành chưa soát: ẩn trên card theo hợp đồng hiện hành, không điền lời hứa thay thế.
+
+Tin Zalo: Giữ mẫu tin và dữ liệu bắt buộc. Chép không có nghĩa gửi đơn. Xác nhận: “Đã chép tin. Mở Zalo và dán để gửi Cam Đào.” Không tự quyết câu PIN còn mở từ phiên trước.
+
+## 3. Sườn UI xuyên suốt
+
+Một hệ nhận diện, ba mức biểu đạt: storefront thân thiện và dễ quét; màn mua rõ và yên; admin/đơn/bảo hành gọn, mật độ phù hợp thao tác. Cùng chữ, màu hành động, trạng thái, avatar và giọng viết; admin không dùng poster 3D làm nền bảng dữ liệu.
+
+Header: Ảnh mèo + camdao; điều hướng ngắn theo IA hiện hành; liên hệ shop dễ tìm. Không hero quá cao đẩy danh sách xuống sâu.
+
+Danh sách: Tìm kiếm và lọc provider/ứng dụng rõ nghĩa; thumbnail nhất quán, tên thật, khác biệt gói, giá và hành động. Không dùng chữ cái N hay icon gần giống thay logo thật.
+
+Card sản phẩm: Thumbnail nhỏ; tên đủ để phân biệt plan; mô tả lợi ích ngắn có căn cứ; thuộc tính lựa chọn; giá; CTA. Không biến mỗi thời hạn thành sản phẩm lặp. Không nhúng giá/điều kiện vào thumbnail UI.
+
+Chọn lựa chọn: Thời hạn → loại tài khoản → bảo hành khi cần chọn, theo hợp đồng; selected có cả dấu/viền và chữ, không chỉ màu. Giá và tóm tắt cập nhật cùng lựa chọn; tổ hợp không bán có lời rõ.
+
+Đặt và gửi: Tóm tắt gói, trường cần thiết, tin xem trước, Chép tin và Mở Zalo. Mobile sheet; desktop theo IA. Không đổi sang checkout/thanh toán mới trong việc style.
+
+Các trạng thái: Default, hover, focus, selected, disabled, loading, empty, error, success; hết hàng và thiếu dữ liệu là trạng thái khác nhau. Mascot không chen vào lỗi bảo mật hoặc làm chìm hướng sửa.
+
+Responsive / dễ dùng: Kiểm desktop 1440 và mobile 390 theo mock hiện có; keyboard/focus, contrast, tràn chữ, gói tên dài, danh sách nguồn dày, ảnh mất, mạng chậm, reduced motion. Không coi PNG là bằng chứng hành vi.
+
+DS trước code: T0 đã thấy Button, Card, Search Input, Text Input, Button Group có render_spec. Chưa xác minh variant camdao hoặc token map. Trước build phải resolve ds.* và kiểm gap; không tự ghi hex/px/font/structure làm canonical. Brief này khóa ý đồ, không giả làm DS đã triển khai.
+
+## 4. Hệ ảnh: thumbnail, campaign và nguồn
+
+Thumbnail UI · 1:1: Một khối chính, logo đọc rõ; chủ thể khoảng 60–70% khung, viền an toàn 10%; nhìn chính diện hoặc 3/4 rất nhẹ vẫn giữ mặt logo dễ đọc. Xem ở 64/80/96 px. Không mèo ở khổ nhỏ. · Không giá, không bảo hành, không thời hạn, không headline. Một master theo product/provider; ảnh có thể dùng chung giữa offer khi bản chất sản phẩm giống.
+
+Campaign sản phẩm · 4:5: Khung chính cho Zalo/social. Brand góc trên; headline và tên plan; hero rõ; vùng giá/điều kiện; CTA. Khoảng trống chữ phải chủ động chừa từ lúc generate nền. · Tên plan, cách cấp, thời hạn, giá, bảo hành, điều kiện, hiệu lực báo giá, CTA từ snapshot đã duyệt.
+
+Campaign so sánh · 1:1 hoặc 4:5: Một sản phẩm, tối đa hai offer cạnh nhau khi còn đọc được. Nhiều hơn thì tách ảnh. Hai offer dùng cùng cấu trúc hàng để nhìn ra khác biệt. · Phân biệt bảo hành 7/30 ngày chẳng hạn chỉ khi dữ liệu xác minh. Không đánh đồng thời hạn tài khoản với bảo hành.
+
+Story · 9:16: Tái bố cục, không crop máy móc từ 4:5. Giữ chữ và mèo khỏi vùng UI che; để khoảng an toàn trên/dưới; kiểm preview kênh thật trước phát hành. · Nội dung rút gọn nhưng không bỏ điều kiện làm thay đổi ý nghĩa.
+
+Banner web · 16:9: Hero một phía; phần còn lại trống để HTML đặt headline/CTA. Không raster hóa chữ tương tác. · Giá và thông tin bán hiển thị bằng lớp web, không nướng vào nền.
+
+Nguồn chuẩn trên host ubuntu-container: mèo /home/strange/screenshots/2026-11-16_214614.png; poster tham chiếu /home/strange/screenshots/2026-11-16_214726.png. Phiên kế phải mở ảnh xác nhận trước khi dùng. Nếu chuyển host, chuyển file hoặc attach đúng ảnh; không tái tạo mèo từ mô tả. Nguồn hiện là local, chưa có asset URL bền cho hai ảnh này trong brief.
+
+Mẫu cũ để so sánh, chưa được duyệt: [Tờ thử thumbnail](https://specs.strangematic.com/docs/subresale-thumbnail-mau-thu-v1). Style profile subresale-price-thumb--art v1 đang raw. Giảm bục kim loại, bi và lụa khi thu nhỏ. Logo lấy từ nguồn chính thức hoặc asset đã kiểm; lưu source_url, ngày kiểm và file gốc. Không vẽ gần giống hoặc tint tùy tiện.
+
+Nếu dùng logo ở bước generate, phải đối chiếu hình học; nếu sai, dùng lớp logo thật trong compositor được hỗ trợ.
+
+## 5. Biến thể theo sản phẩm
+
+[VERIFIED] Catalog có nhiều dòng nội bộ, tên không đồng nhất và có dữ liệu ngoài tài khoản. offer_count > 0 không tự chứng minh offer còn bán tại thời điểm xuất ảnh. Không generate theo toàn bộ resale.product. Mỗi artwork phải có product_id/offer_id đã resolve, tên hiển thị đã soát và nguồn offer còn hiệu lực.
+
+Claude là sản phẩm user yêu cầu làm mẫu; lần đọc v_product_tree không có dòng Claude offer_count > 0, nên minh họa Claude không được mang giá hay lời hứa giả.
+
+| Sản phẩm mẫu | Điểm riêng của art | Nội dung phải xác minh |
+| --- | --- | --- |
+| Claude / Anthropic | Khối kem, nhấn đào/terracotta; logo Claude thật; giấy/khối tri thức trừu tượng tối giản cho campaign. | Plan Pro/Max và mức sử dụng, cách nâng cấp, điều kiện tài khoản, phạm vi bảo hành. Không tự đặt tên Max X5 thành gói đang bán. |
+| ChatGPT / OpenAI | Khối sữa, điểm nhấn mint/teal nhẹ; logo ChatGPT đúng asset; bố cục hội thoại/ý tưởng trừu tượng. | Plus/Pro/Business, nâng cấp cá nhân/cấp sẵn/dùng chung/team. Không dùng một ảnh quảng cáo để che khác biệt quyền sử dụng. |
+| Canva | Điểm cyan–tím lấy từ asset nhận diện đã kiểm; một vài lớp thẻ đồ họa sạch, giữ nền kem. | Pro/Business/Edu, tham gia team hay cá nhân, đối tượng đủ điều kiện. Không chỉ thay tên “Canva Pro Rẻ - Hay lỗi” thành cam kết ổn định. |
+| Netflix | Khối tối, logo đỏ đúng nguồn; ánh sáng ấm và khung màn hình trừu tượng gọn. | Plan, profile/tài khoản, thiết bị/chất lượng nếu được xác minh; không dùng poster phim như tài sản mặc định. |
+| Spotify | Điểm nhấn xanh provider, khối sáng/tối theo độ đọc logo; vòng sóng âm đơn giản. | Cá nhân/slot family, điều kiện tham gia và thời hạn; không tự hứa dùng riêng. |
+| CapCut | Đen–trắng rõ, điểm cam shop; các lớp timeline/frame trừu tượng trong campaign. | Pro/team/chính chủ, thiết bị và quyền lợi đúng offer. |
+
+Các dòng sản phẩm khác dùng cùng schema: provider identity + một motif liên quan công dụng + một accent, không tạo một style mới cho mỗi hãng. Motif là ẩn dụ trang trí, không phải claim tính năng. Phân biệt product brand (ChatGPT) và provider (OpenAI); không suy tên provider từ từ đầu của tên gói.
+
+## 6. Sườn prompt dùng lại
+
+Pipeline đề xuất: (1) khóa brief và dữ liệu; (2) generate art nền/hero; (3) đặt logo thật và mèo nguồn ở lớp kiểm soát được; (4) đặt chữ/giá bằng layer typography editable; (5) export và kiểm. Với bản minh họa một lượt có chữ do image model sinh, ghi rõ concept-only và sửa mọi lỗi chữ trước khi phát hành. Không bắt một prompt tự giải cả dữ liệu bán hàng, logo và typography.
+
+```text
+INPUT RECORD — điền bằng dữ liệu, không để model tự đoán
+brief_version: camdao-v1.1
+approval_ref: <verdict user; chưa có thì concept-only>
+asset_kind: thumbnail | campaign_single | campaign_compare | story | web_banner
+product_id / product_name / provider_name:
+offer_ids / plan_display_name / fulfillment_type:
+logo_asset / logo_source_url / logo_verified_at:
+cat_reference: 2026-11-16_214614.png
+style_reference: 2026-11-16_214726.png
+provider_accent: <từ asset đã kiểm, không màu tự gán là official>
+motif: <một ẩn dụ trang trí>
+aspect_ratio / output_dimensions:
+layout_variant / hero_region / text_safe_region:
+headline_exact / supporting_copy_exact:
+offer_rows: [{name, duration, price_vnd, warranty, eligibility, exclusions}]
+cta_exact / contact_verified:
+data_source / data_checked_at / price_valid_until:
+unknown_fields: []
+output_role: concept-only | release-candidate
+Nếu thiếu dữ kiện thương mại: bỏ dữ kiện đó khỏi ảnh minh họa và ghi ngoài ảnh là chưa xác minh; không điền số giả có vẻ thật.
+decoration: cat_paw
+paw_density: sparse
+attitude: cute_smug_deadpan
+paw_master_asset: <use the same approved shape across all outputs>
+paw_placement: <quiet edge / corner; never content or logo zone>
+```
+
+```text
+MASTER ART PROMPT — nối với một MODULE bên dưới
+Create a cohesive product artwork for camdao, a Vietnamese digital-account shop.
+Art direction: warm cream and peach environment, restrained orange brand accents,
+friendly contemporary shapes, satin ceramic/resin surfaces, soft upper-left studio
+lighting, gentle contact shadows, crisp silhouette, youthful but composed.
+Product: {product_name}; provider: {provider_name}.
+Use only the supplied verified product identity reference. Preserve exact logo
+geometry and colors if included; otherwise leave a clean front-facing logo plane
+for a controlled overlay. Never invent a substitute mark.
+Provider accent: {provider_accent}. Decorative motif: {motif}.
+Keep the product visually dominant. Follow {layout_variant} and {aspect_ratio}.
+Keep {text_safe_region} clean and calm; no detail behind future copy.
+Use the supplied Cam Đào cat photo only when the selected module requests it;
+preserve the cat's photographic identity, markings and expression.
+No generated text, prices, numbers, warranty badges, QR codes or watermarks in this art pass.
+No excessive metallic gold, chrome frames, confetti, glitter, busy silk, generic AI robot,
+fake app screenshots, distorted logos, extra cats or visual claims about product features.
+Signature decoration: sparse rounded cat paw prints, cute with a smug, cheeky,
+deadpan internet-cat attitude — the cat casually owns the place.
+Use the same paw silhouette across the set: one soft central pad and four toe pads,
+no claws. Convey attitude through an off-center tilted stamp or a short strolling trail,
+not an aggressive face or a redraw of the real cat. Keep visual hierarchy calm.
+```
+
+```text
+MODULE T — THUMBNAIL 1:1
+One rounded product tile with a simple readable silhouette, occupying 60–70% of frame.
+Near-front view with an undistorted logo plane; one low quiet base or a soft ground shadow.
+Warm cream background with a subtle {provider_accent} halo.
+At most one tiny supporting form; remove it if it competes at 64 px.
+Keep a 10% safe margin. No cat, no price, no plan text, no headline or mini badges.
+Output a clean square master and inspect previews at 64, 80 and 96 px.
+The logo and product name together in UI identify the product; thumbnail need not encode every offer.
+Optional: one faint paw impression on an outer background corner only.
+Do not add it on the logo tile or replace the logo. Remove the paw in the 64 px
+variant if it becomes noise; the larger campaign carries the full signature.
+```
+
+```text
+MODULE C — PRODUCT CAMPAIGN 4:5
+Compose a warm camdao product campaign with a clear hierarchy:
+quiet brand area at the top; clean headline zone in the upper third;
+product hero in the middle/lower-left; calm offer panel zone on the right or lower third;
+small CTA/footer zone at the bottom. Keep approximately 8% outer safe margins.
+Reserve a small brand-photo slot for the real Cam Đào cat; do not generate a new cat.
+Hero may use one ribbon/arc and up to two small abstract {motif} props.
+Keep all props outside the headline, offer and disclaimer zones.
+Render only the background and product scene. Text and data are supplied later.
+For a two-offer comparison, preserve two equally readable content zones;
+do not shrink fine print to fit. Recompose 1:1, 9:16 and 16:9 individually.
+Add one short trail of 2–3 small paw prints near a quiet outer edge,
+or one slightly tilted paw stamp — choose one, not both.
+It should feel like the shop cat casually walked across its own poster.
+Use a tonal peach/orange treatment, outside all text and product-logo zones.
+Reduce other decorative props to make room; do not accumulate decorations.
+```
+
+```text
+COPY / COMPOSITION PASS
+Place the verified camdao wordmark and supplied cat photo in the brand slot.
+Place the exact verified provider/product logo without changing its proportions or colors.
+Use approved Vietnamese typography resolved for the target surface.
+Headline: {headline_exact}
+Product / plan: {plan_display_name}
+Offer rows: {offer_rows} — preserve price, duration, fulfillment, warranty and exclusions.
+CTA: {cta_exact}; contact: {contact_verified}
+Show material conditions in readable text on the same image; no unsupported claims.
+Keep headline, product name, price, warranty and eligibility as separate editable fields.
+If copy overflows: simplify decoration / enlarge content area / split the image;
+never erase important conditions or silently reduce type to unreadable size.
+Export art-only, final composite, editable source where supported, and provenance manifest.
+```
+
+## 7. Ba prompt điền mẫu cho phiên Codex minh họa
+
+Lô thử không mang giá hoặc bảo hành chưa xác minh. Chọn cùng bố cục cho ba sản phẩm để anh so sánh style, không để thay đổi bố cục che sự thiếu nhất quán.
+
+```text
+CLAUDE THUMBNAIL
+Use MASTER + MODULE T. product_name=Claude; provider_name=Anthropic.
+Accent cue=soft peach/terracotta harmonizing with the supplied verified Claude logo.
+Motif=none at thumbnail size. Cream satin tile, clear front face, quiet warm shadow.
+Use the verified Claude asset as logo reference; no plan label, no price, no cat.
+
+CHATGPT THUMBNAIL
+Use MASTER + MODULE T. product_name=ChatGPT; provider_name=OpenAI.
+Accent cue=muted mint/teal in the environment only; actual logo follows supplied asset.
+Motif=none. Same camera, tile scale and light as the Claude image.
+Do not generate a robot or replace the logo with a generic knot. No price or plan label.
+
+CANVA CAMPAIGN
+Use MASTER + MODULE C. product_name=Canva; provider_name resolved from supplied brand asset.
+Accent cue=cyan/violet from the verified identity reference.
+Motif=two simple layered graphic cards, no fake Canva screen.
+Headline reserved for composition: “Ý tưởng lên hình.”
+Supporting copy reserved: “Khám phá các lựa chọn Canva tại Cam Đào.”
+CTA reserved: “Nhắn Cam Đào để chọn gói.”
+No Pro/Business/Edu claim, price or warranty until an exact offer is verified.
+Small real-cat brand slot; do not turn the campaign into a pet-product advertisement.
+```
+
+## 8. Acceptance và anchor cho phiên kế
+
+Máy kiểm: đúng reference mèo; tên camdao; logo đúng nguồn và không méo; tên product/provider/plan không lẫn; không chữ rác; giá và bảo hành khớp snapshot nếu có; đủ safe zones; thumbnail nhận ra ở 64/80/96; campaign đọc được trên preview điện thoại; UI contrast/focus/tràn/chữ dài được kiểm riêng khi build. Máy ghi phần chưa kiểm được.
+
+User soát cảm nhận theo một contact sheet, không nhận từng task rời.
+
+Lô minh họa đề xuất sau khi chốt: một brand board; ba thumbnail Claude/ChatGPT/Canva; ba campaign tương ứng (concept-only nếu chưa xác minh offer); một UI style tile có header, product card, bộ chọn, input và trạng thái. Tổng hợp thành một doc/contact sheet; nêu rõ các hình UI là minh họa, không chứng minh flow hoạt động. Chưa sản xuất toàn catalog, chưa đổi repo hoặc deploy.
+
+Kế thừa yêu cầu chức năng từ [mock gốc](https://specs.strangematic.com/docs/sub-resale-mock-codex-bang-gia-cum1-2026-11) và [hợp đồng IA](https://specs.strangematic.com/docs/sub-resale-hop-dong-ia-4-cum-v3-2026-11). Các bổ sung K1–K6 và câu PIN chưa phán vẫn giữ nguyên trạng thái; duyệt nhận diện không phải duyệt chức năng hoặc thay chính sách.
+
+```text
+PROMPT MỞ PHIÊN CODEX SAU KHI USER CHỐT
+Đọc doc camdao-brand-ui-image-brief-v1-2026-11 bản v1.1 và journal anchor liên kết.
+Đọc verdict mới nhất; chỉ coi các mục có user approval là đã chốt.
+Mở hai ảnh nguồn, đọc các prompt master/module/input record và mẫu thumbnail cũ.
+Generate lô minh họa mục 8 theo đúng hướng đã chọn. Dùng công cụ image generation
+của phiên; không tự đổi mascot, logo, bảng giá hoặc chính sách.
+Nếu tài sản nguồn không truy cập được, resolve nguồn/attach lại trước phần phụ thuộc.
+Giữ concept-only với offer chưa xác minh; không bịa giá/bảo hành.
+Giao một contact sheet/doc served cùng prompt thực dùng, reference assets,
+provenance và những điểm chưa kiểm. User soát trên hình.
+Không build/deploy UI, không sản xuất toàn catalog trong phiên minh họa này.
+Áp dụng bổ sung user: dấu chân mèo cute, chất meme vênh váo nhẹ.
+Đưa một ví dụ dấu đơn và một ví dụ đường chân ngắn vào brand board để soát.
+Giữ logo sản phẩm, giá, điều kiện và CTA rõ; nét vênh nằm ở trang trí/ảnh mèo.
+```
+
+ĐIỂM CHỐT: A — Cam–kem gọn, mèo ảnh thật, UI tiết chế / campaign có khối mềm (đề xuất). B — Cùng độ rõ thông tin nhưng vui và nổi bật hơn: tăng mảng cam, mèo lớn ở hero/campaign, sticker ảnh cắt; UI giao dịch vẫn gọn. Để đó — giữ draft, không chạy minh họa. Sau A: khóa brief A và ghi anchor. Sau B: sửa các mục nhận diện/campaign/prompt theo B rồi ghi anchor phiên bản tương ứng. Sau Để đó: giữ draft, mở lại khi anh chọn hướng. Không lựa chọn nào tự duyệt dữ kiện bán hàng.
+
+## 6. Story và flow gốc — nội dung hành vi đầy đủ
+
+## Story (tiêu chí đạt đo được)
+
+### S01 — Xem và hiểu bảng giá
+
+As a khách xem bảng giá, I want xem các gói nhóm theo nguồn, giá và tình trạng, so that biết gói nào đặt ngay được.
+
+Evidence: 24058; 24080; IA cụm 1. Priority: high.
+
+- S01-AC1: Given 4 nguồn và 8 gói synthetic, When mở danh sách, Then có đúng 8 card, mỗi product xuất hiện 1 lần, không tách offer thành card.
+
+- S01-AC2: Given gói một/nhiều/không có lựa chọn bán được, When xem card, Then lần lượt thấy Đặt / Chọn gói / ⏸ Tạm hết; giá không đổi cột và nút cao ít nhất 44px.
+
+- S01-AC3: Given màn 390 và 1440, When xem tên dài/mô tả dài, Then tên tối đa 1 dòng, mô tả tối đa 2 dòng, không có cuộn ngang toàn trang; 1440 có cột nguồn và 3 cột card.
+
+### S02 — Tìm và lọc nguồn
+
+As a khách xem bảng giá, I want tìm tên gói và lọc nguồn, so that rút ngắn danh sách cần đọc.
+
+Evidence: IA cụm 1; 24058. Priority: high.
+
+- S02-AC1: Given 8 gói, When nhập Netflix và chọn Netflix, Then thấy đúng 2 gói và số đếm là 2.
+
+- S02-AC2: Given từ khoá không khớp, When tìm, Then thấy 0 card, lời Không có gói khớp và 1 nút Xoá tìm kiếm; bấm nút trả về 8 gói.
+
+- S02-AC3: Given lỗi tải, When bấm Thử lại, Then khôi phục 8 gói fixture; loading có 3 khung xám và không bật nút Đặt giả.
+
+### S03 — Chọn tổ hợp gói bán
+
+As a khách xem bảng giá, I want chọn thời hạn, loại tài khoản và bảo hành theo thứ tự, so that biết đúng giá và mã gói trước khi đặt.
+
+Evidence: 24058 L1–L4; IA F1. Priority: high.
+
+- S03-AC1: Given Netflix có 3 thời hạn và 2 loại TK, When chưa chọn thời hạn, Then hàng loại TK bị khoá; chọn 1 tháng rồi Dùng chung thì thấy 79.000 ₫ và NF-1S.
+
+- S03-AC2: Given tổ hợp 12 tháng dùng chung không bán, When chọn 12 tháng, Then ô Dùng chung có chữ hết và không bấm được; đổi tầng trước xoá lựa chọn phụ thuộc.
+
+- S03-AC3: Given bảo hành 1 giá trị hoặc chưa soát, When mở gói, Then có 0 hàng chọn bảo hành; giá trị đã biết vẫn vào tin, chưa soát không bịa bảo hành.
+
+- S03-AC4: Given gói chỉ 1 offer, When bấm Đặt, Then bỏ qua cả 3 hàng chọn, tới ngay các trường nhập; quay lại giữ nguồn và chữ tìm.
+
+### S04 — Chọn hồ sơ được cấp
+
+As a khách xem bảng giá, I want chọn đúng hồ sơ của mình, so that shop nhận tên hồ sơ thay vì mã số.
+
+Evidence: 23847 C1–C5; 24084 S1–S12; IA J2. Priority: high.
+
+- S04-AC1: Given 5 hồ sơ, When mở Đặt, Then chưa chọn; chọn Hồ sơ 2 thì xem trước in Hồ sơ của bạn: Hồ sơ 2, không in riêng value 2, trong 100ms.
+
+- S04-AC2: Given 12 hồ sơ và nhãn dài 40 ký tự, When bấm Xem cả 12 hồ sơ, Then mở trang con cùng sheet có tìm và nút Đơn đặt; chọn mục 12 in đầy đủ nhãn không tràn trang.
+
+- S04-AC3: Given 1/0 options hoặc thiếu options legacy, When mở ô, Then lần lượt tự chọn 1 / ẩn ô cùng dòng tin / hiện ô gõ bắt buộc; unresolved không vẽ và không in.
+
+- S04-AC4: Given giá trị cũ không có trong options, When dựng lại, Then bỏ giá trị đó và báo Chọn hồ sơ; đóng/mở cùng gói giữ hồ sơ nhưng xoá PIN, đổi gói không lẫn hồ sơ, tải lại xoá tất cả.
+
+### S05 — Điền thông tin đặt
+
+As a khách xem bảng giá, I want điền PIN, Email và trường theo order_fields, so that gửi đủ thông tin cần cho đúng gói.
+
+Evidence: 23847; 24084; IA F2. Priority: high.
+
+- S05-AC1: Given gói shared cần hồ sơ và PIN, When chưa đủ, Then Chép tin tắt, có lời chỉ đúng trường thiếu; PIN luôn che ở ô nhập và yêu cầu đúng 4 chữ số.
+
+- S05-AC2: Given gói riêng yêu cầu Email, When nhập email sai rồi sửa thành minh@example.test, Then lỗi cạnh ô biến mất và Chép tin bật; gói không yêu cầu Email có 0 ô Email.
+
+- S05-AC3: Given nhập bất kỳ thông tin nào, When điền và chuyển màn, Then 0 request mạng và 0 ghi localStorage/sessionStorage; trường hiển thị theo sort_order Hồ sơ → PIN → Ghi chú.
+
+### S06 — Xem trước và chép tin
+
+As a khách xem bảng giá, I want kiểm tra và chép tin đặt hàng, so that gửi shop một tin đầy đủ, không lặp nhãn.
+
+Evidence: 23791; IA F2; 24883. Priority: high.
+
+- S06-AC1: Given chọn offer NF-1S và Hồ sơ 2/PIN 1234, When xem tin, Then có tên gói, thời hạn, loại TK, giá, Mã gói: NF-1S, nhãn Hồ sơ 2 và PIN 1234 theo đúng thứ tự.
+
+- S06-AC2: Given tên gói chứa nguyên nhãn loại TK không phân biệt hoa thường, When tạo tin, Then nhãn loại TK xuất hiện đúng 1 lần; trường unresolved và bảo hành chưa biết có 0 dòng.
+
+- S06-AC3: Given tin hợp lệ, When Chép thành công, Then hiện Đã chép; khi clipboard bị chặn, Then giữ nguyên tin để chọn/chép tay, không báo thành công giả.
+
+### S07 — Mở Zalo và quay lại
+
+As a khách xem bảng giá, I want mở cuộc trò chuyện shop sau khi chép, so that gửi yêu cầu đặt mà không mất nội dung.
+
+Evidence: IA F2; 23791 keep_list. Priority: high.
+
+- S07-AC1: Given footer tại 390/1440, When xem Đặt hoặc tin, Then Mở Zalo nằm cạnh Chép tin và mỗi nút cao ≥44px; mở Zalo không tự chép.
+
+- S07-AC2: Given đây là mock synthetic không có địa chỉ shop thật, When bấm Mở Zalo, Then đến màn mô phỏng có tin chờ dán và lời rõ chưa gửi, có 0 request ra Zalo.
+
+- S07-AC3: Given quay lại từ Zalo hoặc Huỷ, When trở về, Then giữ gói/tìm/nguồn/hồ sơ trong phiên, PIN phải nhập lại khi mở hộp Đặt mới; có ít nhất 1 đường trở về danh sách.
+
+## Flow (bước chính theo story)
+
+| Flow | Bước (màn · AC) |
+| --- | --- |
+| F01 · S01 | 1. danh-sach — mở bảng giá → 4 nguồn/8 gói, giá, trạng thái [AC1] · 2. danh-sach — đọc tên → mô tả → thuộc tính → giá → hành động [AC2,AC3] |
+| F02 · S02 | 1. danh-sach — nhập từ khoá/chọn nguồn → đếm và lọc ngay [AC1] · 2. rong — không khớp → Xoá tìm kiếm → 8 gói [AC2] · 3. loi-tai — Thử lại → khung xám → 8 gói [AC3] |
+| F03 · S03 | 1. tuy-chon — chọn thời hạn, mở khoá loại TK → giá + mã [AC1,AC2] · 2. dat-rieng — bảo hành nếu >1 giá trị [AC3] · 3. dat-ho-so — đủ tổ hợp → điền thông tin; gói 1 offer vào thẳng Đặt [AC4] |
+| F04 · S04 | 1. dat-ho-so — chưa chọn; chạm Hồ sơ 2 → nhãn vào tin [AC1,AC3] · 2. ho-so-day — xem cả 12, tìm nhãn dài cuối → quay Đơn đặt [AC2] · 3. dat-ho-so — đóng/mở/đổi gói/tải lại giữ hoặc xoá đúng [AC4] |
+| F05 · S05 | 1. loi-nhap — trường thiếu → lời chỉ ô + Chép tắt [AC1] · 2. dat-rieng — PIN 4 số / Email hợp lệ → Chép bật [AC2] · 3. dat-ho-so — Ghi chú → tin đúng thứ tự, chỉ RAM [AC3] |
+| F06 · S06 | 1. tin-chep — đọc tin + mã gói, sửa nếu cần [AC1,AC2] · 2. loi-chep — Chép → Đã chép hoặc bị chặn + chép tay [AC3] |
+| F07 · S07 | 1. mo-zalo — Mở Zalo cạnh Chép → màn mô phỏng, chưa gửi [AC1,AC2] · 2. danh-sach — quay lại giữ context, mở lại xoá PIN [AC3] |
+
+Nhánh chung mọi flow (thợ ghi giống nhau): rỗng → rong; lỗi tải/nhập/chép → loi-tai / loi-nhap / loi-chep, giữ dữ liệu hợp lệ; dày → cuộn trong danh sách, ho-so-day tìm mục cuối; tràn chữ → tên card 1 dòng, mô tả ≤2, nhãn hồ sơ/tin xuống dòng đủ; quay lại → Đơn đặt / Huỷ / Escape về danh sách với bộ lọc cũ, PIN xoá khi mở lại, reload reset.
+
+## 7. Bàn giao và kiểm hoàn thành
+
+1. Chạy prototype, không chỉ tạo ảnh tĩnh.
+2. Có navigation tới đủ 15 screen key và walkthrough 7 flow.
+3. Xuất 30 screenshot cơ sở và ảnh stress bổ sung.
+4. Kiểm chọn/reset phụ thuộc, validation, copy success/fail, state khi đóng/mở/đổi gói/reload.
+5. Không gửi input qua mạng, analytics, console hoặc lưu storage. Giữ trong RAM.
+6. Thử keyboard, focus rõ, Escape/close, scroll nội bộ, không cuộn ngang trang. Nút tối thiểu 44 px theo AC gốc. Kiểm contrast chữ thường ≥4.5:1, không chỉ dựa vào cảm nhận.
+7. Xuất component/theme dùng chung, data fixtures, manifest asset và nguồn gốc.
+8. Bảng coverage: story, AC, flow, screen key, viewport, bằng chứng, pass/fail/missing.
+9. Giao một contact sheet/doc hoặc preview có thể mở trong môi trường người dùng. Không chỉ báo đường dẫn không truy cập được.
+10. Ghi rõ giới hạn, các asset đang placeholder và giả định PIN. Không tự gắn user-approved.
+
+## 8. Override môi trường độc lập — đọc cuối trước khi làm
+
+Các đoạn chép từ brief nguồn có nhắc DB, ds.*, journal, link nội bộ hoặc gate của platform chỉ là provenance và yêu cầu cho giai đoạn tích hợp sau. Trong nhiệm vụ Gemini này:
+- Không có DB và không cần DB.
+- Không yêu cầu user cấp quyền DB hoặc đăng ký token/variant.
+- Dùng theme/component prototype cục bộ như mục 0, báo rõ đó là prototype.
+- Không cần mở link trong brief để tìm thêm yêu cầu: yêu cầu đã nhúng ở file này.
+- Ảnh và logo dùng attachment hoặc nguồn công khai truy cập được. Không giả đã đọc file host.
+- Hướng đã chọn: cam–kem gọn + mèo thật + dấu chân cute/vênh nhẹ. Bỏ câu hỏi A/B cũ trong phần nguồn; không hỏi lại hướng.
+- Render illustration/asset và UI phải phân biệt: UI tương tác dựng bằng code; art có thể generate. Chữ và giá UI là DOM, không raster hóa.
+- Hoàn thành đủ phạm vi trước khi bàn giao; báo thiếu cụ thể nếu môi trường không chạy/chụp được.
+
